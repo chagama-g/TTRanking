@@ -21,12 +21,60 @@
         }
     }
 
+    let graph_div = "score_graph"
+
     console.log("TTRanking");
 
-    let users = getRankingList();
-    users.forEach((elem, index) => {
-        console.log(elem.name, elem.score);
+    appendScript("https://www.gstatic.com/charts/loader.js");
+
+    window.addEventListener("load", (e) => {
+        createGraphElem();
+        drawGraph();
     });
+
+
+    function createGraphElem() {
+        let insert_pos = document.getElementById("controlbox");
+
+        let graph_elem = document.createElement('div');
+        graph_elem.id = graph_div;
+        graph_elem.style.height = "400px";
+        graph_elem.style.paddingTop = "6px";
+
+        insert_pos.after(graph_elem);
+    }
+
+
+    function drawGraph() {
+        google.charts.load("current", { packages: ["corechart"] });
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+            let options = {
+                title: 'Score Distribution',
+                legend: { position: 'none' },
+                histogram: {
+                    bucketSize: 5
+                }
+            };
+            let chart = new google.visualization.Histogram(document.getElementById(graph_div));
+            chart.draw(getGoogleVisualizationDataTable(), options);
+        }
+    }
+
+
+    function getGoogleVisualizationDataTable() {
+        let users = getRankingList();
+        let data = [];
+        users.forEach((elem, index) => {
+            data[index] = [elem.name, elem.score];
+        });
+        data.unshift(["Name", "Score"]);
+
+        data = google.visualization.arrayToDataTable(data);
+
+        return data;
+    }
 
 
     function getRankingList() {
@@ -46,5 +94,11 @@
 
         return users;
     }
+
+    function appendScript(URL) {
+        var el = document.createElement('script');
+        el.src = URL;
+        document.body.appendChild(el);
+    };
 
 })();
